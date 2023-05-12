@@ -71,10 +71,7 @@ def maybe_cast_one_to_many(
         if isinstance(target[0], (int, float)):
             return [target]  # type: ignore
     # One Metadata dict
-    if isinstance(target, dict):
-        return [target]
-    # Already a sequence
-    return target  # type: ignore
+    return [target] if isinstance(target, dict) else target
 
 
 def validate_ids(ids: IDs) -> IDs:
@@ -122,7 +119,7 @@ def validate_where(where: Where) -> Where:
             raise ValueError(
                 f"Expected where value to be a str, int, float, or operator expression, got {value}"
             )
-        if key == "$and" or key == "$or":
+        if key in ["$and", "$or"]:
             if not isinstance(value, list):
                 raise ValueError(
                     f"Expected where value for $and or $or to be a list of where expressions, got {value}"
@@ -143,11 +140,15 @@ def validate_where(where: Where) -> Where:
 
             for operator, operand in value.items():
                 # Only numbers can be compared with gt, gte, lt, lte
-                if operator in ["$gt", "$gte", "$lt", "$lte"]:
-                    if not isinstance(operand, (int, float)):
-                        raise ValueError(
-                            f"Expected operand value to be an int or a float for operator {operator}, got {operand}"
-                        )
+                if operator in [
+                    "$gt",
+                    "$gte",
+                    "$lt",
+                    "$lte",
+                ] and not isinstance(operand, (int, float)):
+                    raise ValueError(
+                        f"Expected operand value to be an int or a float for operator {operator}, got {operand}"
+                    )
 
                 if operator not in ["$gt", "$gte", "$lt", "$lte", "$ne", "$eq"]:
                     raise ValueError(
@@ -177,7 +178,7 @@ def validate_where_document(where_document: WhereDocument) -> WhereDocument:
             raise ValueError(
                 f"Expected where document operator to be one of $contains, $and, $or, got {operator}"
             )
-        if operator == "$and" or operator == "$or":
+        if operator in ["$and", "$or"]:
             if not isinstance(operand, list):
                 raise ValueError(
                     f"Expected document value for $and or $or to be a list of where document expressions, got {operand}"
@@ -188,7 +189,6 @@ def validate_where_document(where_document: WhereDocument) -> WhereDocument:
                 )
             for where_document_expression in operand:
                 validate_where_document(where_document_expression)
-        # Value is a $contains operator
         elif not isinstance(operand, str):
             raise ValueError(
                 f"Expected where document operand value for operator $contains to be a str, got {operand}"

@@ -81,7 +81,7 @@ class DuckDB(Clickhouse):
         # poor man's unique constraint
         dupe_check = self.get_collection(name)
         if len(dupe_check) > 0:
-            if get_or_create is True:
+            if get_or_create:
                 logger.info(
                     f"collection with name {name} already exists, returning existing collection"
                 )
@@ -221,7 +221,7 @@ class DuckDB(Clickhouse):
         operator = list(where_document.keys())[0]
         if operator == "$contains":
             results.append(f"position('{where_document[operator]}' in document) > 0")
-        elif operator == "$and" or operator == "$or":
+        elif operator in ["$and", "$or"]:
             all_subresults = []
             for subwhere in where_document[operator]:
                 subresults = []
@@ -330,7 +330,7 @@ class DuckDB(Clickhouse):
             FROM
                 embeddings
             WHERE
-                uuid IN ({','.join([("'" + str(x) + "'") for x in ids])})
+                uuid IN ({','.join([f"'{str(x)}'" for x in ids])})
         """
         ).fetchall()
 
@@ -428,7 +428,7 @@ class PersistentDuckDB(DuckDB):
             path = self._save_folder + "/chroma-embeddings.parquet"
             self._conn.execute(f"INSERT INTO embeddings SELECT * FROM read_parquet('{path}');")
             logger.info(
-                f"""loaded in {self._conn.query(f"SELECT COUNT() FROM embeddings").fetchall()[0][0]} embeddings"""
+                f"""loaded in {self._conn.query('SELECT COUNT() FROM embeddings').fetchall()[0][0]} embeddings"""
             )
 
         # load in the collections
@@ -438,7 +438,7 @@ class PersistentDuckDB(DuckDB):
             path = self._save_folder + "/chroma-collections.parquet"
             self._conn.execute(f"INSERT INTO collections SELECT * FROM read_parquet('{path}');")
             logger.info(
-                f"""loaded in {self._conn.query(f"SELECT COUNT() FROM collections").fetchall()[0][0]} collections"""
+                f"""loaded in {self._conn.query('SELECT COUNT() FROM collections').fetchall()[0][0]} collections"""
             )
 
     def __del__(self):

@@ -74,7 +74,7 @@ class Hnswlib(Index):
     _label_to_id: Dict[int, str]
 
     def __init__(self, id, settings, metadata):
-        self._save_folder = settings.persist_directory + "/index"
+        self._save_folder = f"{settings.persist_directory}/index"
         self._params = HnswParams(metadata)
         self._id = id
         self._index = None
@@ -118,9 +118,9 @@ class Hnswlib(Index):
     def add(self, ids, embeddings, update=False):
         """Add or update embeddings to the index"""
 
-        dim = len(embeddings[0])
-
         if self._index is None:
+            dim = len(embeddings[0])
+
             self._init_index(dim)
 
         # Check dimensionality
@@ -238,10 +238,7 @@ class Hnswlib(Index):
             if len(labels) < k:
                 k = len(labels)
 
-        filter_function = None
-        if len(labels) != 0:
-            filter_function = lambda label: label in labels
-
+        filter_function = (lambda label: label in labels) if len(labels) != 0 else None
         logger.debug(f"time to pre process our knn query: {time.time() - s2}")
 
         s3 = time.time()

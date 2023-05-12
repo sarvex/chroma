@@ -208,7 +208,7 @@ class FastAPI(chromadb.server.Server):
 
     def get_nearest_neighbors(self, collection_name, query: QueryEmbedding):
         try:
-            nnresult = self._api._query(
+            return self._api._query(
                 collection_name=collection_name,
                 where=query.where,
                 where_document=query.where_document,
@@ -216,7 +216,6 @@ class FastAPI(chromadb.server.Server):
                 n_results=query.n_results,
                 include=query.include,
             )
-            return nnresult
         except NoDatapointsException as e:
             raise HTTPException(status_code=500, detail=str(e))
         except InvalidDimensionException as e:

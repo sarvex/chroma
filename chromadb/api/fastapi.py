@@ -34,11 +34,10 @@ class FastAPI(API):
         resp = requests.get(self._api_url + "/collections")
         resp.raise_for_status()
         json_collections = resp.json()
-        collections = []
-        for json_collection in json_collections:
-            collections.append(Collection(self, **json_collection))
-
-        return collections
+        return [
+            Collection(self, **json_collection)
+            for json_collection in json_collections
+        ]
 
     def create_collection(
         self,
@@ -253,8 +252,7 @@ class FastAPI(API):
         except requests.HTTPError:
             raise (Exception(resp.text))
 
-        body = resp.json()
-        return body
+        return resp.json()
 
     def reset(self):
         """Resets the database"""

@@ -73,10 +73,10 @@ class Telemetry:
     def context(self) -> dict:
         chroma_version = chromadb.__version__
         settings = chromadb.get_settings()
-        telemetry_settings = {}
-        for whitelisted in TELEMETRY_WHITELISTED_SETTINGS:
-            telemetry_settings[whitelisted] = settings[whitelisted]
-
+        telemetry_settings = {
+            whitelisted: settings[whitelisted]
+            for whitelisted in TELEMETRY_WHITELISTED_SETTINGS
+        }
         self._context = {
             "chroma_version": chroma_version,
             "server_context": self.SERVER_CONTEXT.value,

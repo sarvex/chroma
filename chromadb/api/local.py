@@ -150,13 +150,13 @@ class LocalAPI(API):
             >>> client.list_collections()
             [collection(name="my_collection", metadata={})]
         """
-        collections = []
         db_collections = self._db.list_collections()
-        for db_collection in db_collections:
-            collections.append(
-                Collection(client=self, name=db_collection[1], metadata=db_collection[2])
+        return [
+            Collection(
+                client=self, name=db_collection[1], metadata=db_collection[2]
             )
-        return collections
+            for db_collection in db_collections
+        ]
 
     def _modify(
         self,

@@ -28,7 +28,7 @@ with open(f"{path}/../config/chroma_users.xml") as f:
     chroma_users_config = str(f.read())
 
 
-cloud_config_script = f"""
+cloud_config_script = """
 #cloud-config
 cloud_final_modules:
 - [scripts-user, always]

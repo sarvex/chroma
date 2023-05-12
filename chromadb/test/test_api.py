@@ -30,7 +30,7 @@ def local_persist_api():
         Settings(
             chroma_api_impl="local",
             chroma_db_impl="duckdb+parquet",
-            persist_directory=tempfile.gettempdir() + "/test_server",
+            persist_directory=f"{tempfile.gettempdir()}/test_server",
         )
     )
 
@@ -42,7 +42,7 @@ def local_persist_api_cache_bust():
         Settings(
             chroma_api_impl="local",
             chroma_db_impl="duckdb+parquet",
-            persist_directory=tempfile.gettempdir() + "/test_server",
+            persist_directory=f"{tempfile.gettempdir()}/test_server",
         )
     )
 
@@ -69,7 +69,7 @@ def run_server():
     settings = Settings(
         chroma_api_impl="local",
         chroma_db_impl="duckdb",
-        persist_directory=tempfile.gettempdir() + "/test_server",
+        persist_directory=f"{tempfile.gettempdir()}/test_server",
     )
     server = chromadb.server.fastapi.FastAPI(settings)
     uvicorn.run(server.app(), host="0.0.0.0", port=6666, log_level="info")
@@ -83,9 +83,8 @@ def await_server(attempts=0):
     except ConnectionError as e:
         if attempts > 10:
             raise e
-        else:
-            time.sleep(2)
-            await_server(attempts + 1)
+        time.sleep(2)
+        await_server(attempts + 1)
 
 
 @pytest.fixture(scope="module", autouse=True)

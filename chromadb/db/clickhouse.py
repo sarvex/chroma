@@ -36,10 +36,7 @@ def db_array_schema_to_clickhouse_schema(table_schema):
 
 
 def db_schema_to_keys() -> List[str]:
-    keys = []
-    for element in EMBEDDING_TABLE_SCHEMA:
-        keys.append(list(element.keys())[0])
-    return keys
+    return [list(element.keys())[0] for element in EMBEDDING_TABLE_SCHEMA]
 
 
 class Clickhouse(DB):
@@ -129,8 +126,7 @@ class Clickhouse(DB):
 
         where_clauses.append(f"collection_uuid = '{collection_uuid}'")
         where_str = " AND ".join(where_clauses)
-        where_str = f"WHERE {where_str}"
-        return where_str
+        return f"WHERE {where_str}"
 
     #
     #  COLLECTION METHODS
@@ -370,7 +366,7 @@ class Clickhouse(DB):
         operator = list(where_document.keys())[0]
         if operator == "$contains":
             results.append(f"position(document, '{where_document[operator]}') > 0")
-        elif operator == "$and" or operator == "$or":
+        elif operator in ["$and", "$or"]:
             all_subresults = []
             for subwhere in where_document[operator]:
                 subresults = []
@@ -420,9 +416,7 @@ class Clickhouse(DB):
         if offset is not None or isinstance(offset, int):
             where_str += f" OFFSET {offset}"
 
-        val = self._get(where=where_str, columns=columns)
-
-        return val
+        return self._get(where=where_str, columns=columns)
 
     def _count(self, collection_uuid: str):
         where_string = f"WHERE collection_uuid = '{collection_uuid}'"
